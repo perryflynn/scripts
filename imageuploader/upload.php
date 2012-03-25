@@ -18,7 +18,7 @@
      * curl -F userfile=foo.png -F upload=true "http://somehost.de/somefolder/upload.php?secret=somesecret"
      */
 
-define("SECRET_KEY", "79dd364ddae7bd82f2579663dbfssa23"); // <-- somesecret als md5 hash
+define("SECRET_KEY", "79df364ddae7bd82f2579663dbfssa23"); // <-- somesecret als md5 hash
 define("DIR", dirname(__FILE__)."/");
 
 //--> Check Secret
