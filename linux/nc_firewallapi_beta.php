@@ -3,6 +3,7 @@
    /**
    // (c) by Christian Blechert (http://anwendungsentwickler.ws)
    // Created: 2012-02-25
+   // Last update: 2012-03-28
    // License: http://creativecommons.org/licenses/by/3.0/
 
       Use the netcup firewall API width fail2ban
@@ -35,7 +36,7 @@
 
    
    line("\n\nIPTables wrapper script for netcup VCP firewall");
-   line("Version: 0.0.1");
+   line("Version: 0.0.2");
    line("(c) 2012 by Christian Blechert (http://fiae.ws)");
    line("-------------------------------------------------------------\n");
 
