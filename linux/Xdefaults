@@ -1,0 +1,24 @@
+URxvt.perl-ext-common: default,matcher,tabbed
+URxvt.urlLauncher: chromium-browser
+URxvt.matcher.button: 1
+URxvt.matcher.pattern.1: \\bwww\\.[\\w-]\\.[\\w./?&@#-]*[\\w/-]
+URxvt.foreground: green
+URxvt.background: black
+URxvt.scrollBar: false
+URxvt.tintColor: black
+URxvt.shading: 15
+URxvt.inheritPixmap: true
+URxvt*secondaryScroll: false
+URxvt.geometry: 100x30
+
+URxvt.saveLines: 10000
+URxvt.buffered: true
+URxvt.cursorColor: green
+URxvt.underlineColor: green
+URxvt.title: Arch Linux URXVT
+
+URxvt.tabbed.tabbar-fg: 3
+URxvt.tabbed.tabbar-bg: 0
+URxvt.tabbed.tab-fg: 0
+URxvt.tabbed.tab-bg: 2
+URxvt.tabbed.perl-ext-common: mark-urls,tabbed
