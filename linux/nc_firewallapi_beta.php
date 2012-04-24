@@ -3,10 +3,10 @@
    /**
    // (c) by Christian Blechert (http://anwendungsentwickler.ws)
    // Created: 2012-02-25
-   // Last update: 2012-03-28
+   // Last update: 2012-04-24
    // License: http://creativecommons.org/licenses/by/3.0/
 
-      Use the netcup firewall API width fail2ban
+      Use the netcup firewall API with fail2ban
 
       Usage:
       php -f firewallapi.php add INPUT "42.42.42.42" DROP
