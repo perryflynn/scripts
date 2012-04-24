@@ -19,7 +19,6 @@
    $file = $dir."nc_vcp_settings.php";
    
    if(file_exists($file) && is_file($file) && is_readable($file)) {
-      line('Use external settings file...', true);
       include($file);
       
    //--> Settings if external file not exists
@@ -44,6 +43,8 @@
       define("IP_BLACKLIST", "0.0.0.0,127.0.0.1");
 
       /* END DEFINES *************************************************************/
+      
+      line("External configuration not found");
       
    }
 
