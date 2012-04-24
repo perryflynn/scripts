@@ -123,6 +123,12 @@
       $result = $vcp->getFirewall($params);
       
       $ruleset = $result->return;
+      
+      // If rule count <=1, no array given
+      if(is_object($ruleset) && !is_array($ruleset)) {
+         $ruleset = array($ruleset);
+      }
+      
       $deleteset = array();
       foreach($ruleset as $rule) {
          if(is_object($rule) && 
@@ -133,7 +139,7 @@
             $deleteset[] = array("id"=>$rule->id);
          }
       }
-
+      
       if(count($deleteset)>0) {
 
          $params['rule'] = $deleteset;
