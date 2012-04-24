@@ -14,25 +14,38 @@
 
    */
 
-   /* DEFINES *****************************************************************/
+   //--> Check for external Settings File
+   $dir = dirname(__FILE__)."/";
+   $file = $dir."nc_vcp_settings.php";
+   
+   if(file_exists($file) && is_file($file) && is_readable($file)) {
+      line('Use external settings file...', true);
+      include($file);
+      
+   //--> Settings if external file not exists
+   } else {
 
-   //--> enable/disable debug output
-   define("DEBUG_OUTPUT", true);
+      /* DEFINES *****************************************************************/
 
-   //--> API URL
-   define("SOAP_URL", "https://www.vservercontrolpanel.de/WSEndUser?wsdl");
+      //--> enable/disable debug output
+      define("DEBUG_OUTPUT", true);
 
-   //--> VCP logindata
-   define("VCP_USERNAME", "<placehere>");
-   define("VCP_PASSWORD", "<placehere>");
+      //--> API URL
+      define("SOAP_URL", "https://www.vservercontrolpanel.de/WSEndUser?wsdl");
 
-   //--> vServer name (vXXXXXXXXXXXXXXXX)
-   define("VCP_SERVERNAME", "<placehere>");
+      //--> VCP logindata
+      define("VCP_USERNAME", "<placehere>");
+      define("VCP_PASSWORD", "<placehere>");
 
-   //--> Blacklisted IPs will not blocked
-   define("IP_BLACKLIST", "0.0.0.0,127.0.0.1");
+      //--> vServer name (vXXXXXXXXXXXXXXXX)
+      define("VCP_SERVERNAME", "<placehere>");
 
-   /* END DEFINES *************************************************************/
+      //--> Blacklisted IPs will not blocked
+      define("IP_BLACKLIST", "0.0.0.0,127.0.0.1");
+
+      /* END DEFINES *************************************************************/
+      
+   }
 
    
    line("\n\nIPTables wrapper script for netcup VCP firewall");
@@ -51,8 +64,8 @@
    }
    
    //--> Print line to stdout
-   function line($str) {
-      if(DEBUG_OUTPUT) echo $str."\n";
+   function line($str, $debug_override=false) {
+      if((defined('DEBUG_OUTPUT') && DEBUG_OUTPUT) || $debug_override===true) echo $str."\n";
    }
    
    //--> Valid IP?
@@ -74,7 +87,8 @@
          'direction' => $chain,
          'proto' => "any",
          'srcIP' => $sourceip,
-         'target' => $target
+         'target' => $target,
+         'comment' => 'Added by Fail2Ban at '.date("Y-m-d H:i:s").' from Host '.php_uname('n')
       );
 
       $params = array(
@@ -110,7 +124,11 @@
       $ruleset = $result->return;
       $deleteset = array();
       foreach($ruleset as $rule) {
-         if($rule->direction==$chain && (isset($rule->srcIP) && $rule->srcIP==$sourceip) && $rule->target==$target) {
+         if(is_object($rule) && 
+               (isset($rule->direction) && $rule->direction==$chain) && 
+               (isset($rule->srcIP) && $rule->srcIP==$sourceip) && 
+               (isset($rule->target) && $rule->target==$target)) 
+         {
             $deleteset[] = array("id"=>$rule->id);
          }
       }
