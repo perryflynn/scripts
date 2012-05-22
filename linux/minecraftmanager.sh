@@ -71,7 +71,10 @@ fi
 
 # Stop server
 sendstop() {
-   screen -s $screenname -X eval 'stuff "stop"\015'
+   dialog --infobox "Send a ingame message, wait 10 secounds and shutdown the server..." 5 80
+   screen -s $screenname -X eval 'stuff \015"say Server will shutting down in 10 secounds. Please logout."\015'
+   sleep 10
+   screen -s $screenname -X eval 'stuff \015"stop"\015'
 }
 
 # Display error message
