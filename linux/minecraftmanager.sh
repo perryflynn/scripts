@@ -7,6 +7,8 @@
 #
 # Created: 2012-05-21
 # Last modified: 2012-05-22
+#
+# German Manual: http://fiae.ws/422
 # 
 # Usage:
 # ./mcmanager.sh # Allow status, start, stop, logcat
