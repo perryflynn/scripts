@@ -24,7 +24,7 @@
    //--> Settings if external file not exists
    } else {
 
-      /* DEFINES *****************************************************************/
+      /* DEFINES **************************************************************/
 
       //--> enable/disable debug output
       define("DEBUG_OUTPUT", true);
@@ -42,7 +42,7 @@
       //--> Blacklisted IPs will not blocked
       define("IP_BLACKLIST", "0.0.0.0,127.0.0.1");
 
-      /* END DEFINES *************************************************************/
+      /* END DEFINES **********************************************************/
       
       line("External configuration not found");
       
@@ -50,7 +50,7 @@
 
    
    line("\n\nIPTables wrapper script for netcup VCP firewall");
-   line("Version: 0.0.2");
+   line("Version: 0.0.3");
    line("(c) 2012 by Christian Blechert (http://fiae.ws)");
    line("-------------------------------------------------------------\n");
 
@@ -86,9 +86,12 @@
       
       $rule = array(
          'direction' => $chain,
+         'sort' => "0",
          'proto' => "any",
          'srcIP' => $sourceip,
          'target' => $target,
+         'match' => 'STATE',
+         'matchValue' => 'NEW,ESTABLISHED,RELATED',
          'comment' => 'Added by Fail2Ban at '.date("Y-m-d H:i:s").' from Host '.php_uname('n')
       );
 
@@ -96,7 +99,8 @@
          'loginName' => VCP_USERNAME,
          'password' => VCP_PASSWORD,
          'vserverName' => VCP_SERVERNAME,
-         'rule' => array($rule));
+         'rule' => array($rule)
+      );
       
       $result = $vcp->addFirewallRule($params);
    
@@ -118,7 +122,8 @@
       $params = array(
          'loginName' => VCP_USERNAME,
          'password' => VCP_PASSWORD,
-         'vserverName' => VCP_SERVERNAME);
+         'vserverName' => VCP_SERVERNAME
+      );
       
       $result = $vcp->getFirewall($params);
       
@@ -132,9 +137,9 @@
       $deleteset = array();
       foreach($ruleset as $rule) {
          if(is_object($rule) && 
-               (isset($rule->direction) && $rule->direction==$chain) && 
-               (isset($rule->srcIP) && $rule->srcIP==$sourceip) && 
-               (isset($rule->target) && $rule->target==$target)) 
+            (isset($rule->direction) && $rule->direction==$chain) && 
+            (isset($rule->srcIP) && $rule->srcIP==$sourceip) && 
+            (isset($rule->target) && $rule->target==$target)) 
          {
             $deleteset[] = array("id"=>$rule->id);
          }
