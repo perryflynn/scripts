@@ -89,6 +89,7 @@
          'sort' => "0",
          'proto' => "any",
          'srcIP' => $sourceip,
+         'destIP'=>'0.0.0.0/0',
          'target' => $target,
          'match' => 'STATE',
          'matchValue' => 'NEW,ESTABLISHED,RELATED',
