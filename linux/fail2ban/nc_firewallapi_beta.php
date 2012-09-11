@@ -86,7 +86,7 @@
       
       $rule = array(
          'direction' => $chain,
-         'sort' => "0",
+         'sort' => "1",
          'proto' => "any",
          'srcIP' => $sourceip,
          'destIP'=>'0.0.0.0/0',
