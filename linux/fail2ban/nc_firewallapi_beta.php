@@ -3,13 +3,14 @@
    /**
    // (c) by Christian Blechert (http://anwendungsentwickler.ws)
    // Created: 2012-02-25
-   // Last update: 2012-04-24
+   // Last update: 2012-09-18
    // License: http://creativecommons.org/licenses/by/3.0/
 
-      Use the netcup firewall API with fail2ban
+      Command Line Interface for Netcup VCP Firewall
 
       Usage:
       php -f firewallapi.php add INPUT "42.42.42.42" DROP
+      php -f firewallapi.php add INPUT "42.42.42.42" DROP "a comment"
       php -f firewallapi.php delete INPUT "42.42.42.42" DROP
 
    */
@@ -47,26 +48,27 @@
       line("External configuration not found");
       
    }
-
    
-   line("\n\nIPTables wrapper script for netcup VCP firewall");
-   line("Version: 0.0.3");
-   line("(c) 2012 by Christian Blechert (http://fiae.ws)");
-   line("-------------------------------------------------------------\n");
-
+   
    
    /* FUNCTIONS ***************************************************************/
-
    
-   //--> Print usage
-   function usage() {
-      global $argv;
-      echo "\nUsage: ".$argv[0]." add|delete INPUT|OUTPUT sourceIP ACCEPT|REJECT|DROP\n";
-   }
    
    //--> Print line to stdout
    function line($str, $debug_override=false) {
       if((defined('DEBUG_OUTPUT') && DEBUG_OUTPUT) || $debug_override===true) echo $str."\n";
+   }
+   
+   //--> Print usage
+   function usage() {
+      global $argv;
+      line("\n\nIPTables wrapper script for netcup VCP firewall");
+      line("Version: 0.1.0");
+      line("(c) 2012 by Christian Blechert (http://fiae.ws)");
+      line("-------------------------------------------------------------\n");
+      line("php -f ".$argv[0]." add INPUT|OUTPUT sourceIP ACCEPT|REJECT|DROP");
+      line("php -f ".$argv[0]." add INPUT|OUTPUT sourceIP ACCEPT|REJECT|DROP \"a comment\"");
+      line("php -f ".$argv[0]." delete INPUT|OUTPUT sourceIP ACCEPT|REJECT|DROP");
    }
    
    //--> Valid IP?
@@ -80,98 +82,19 @@
       }
    }
    
-   //--> Add rule
-   function action_add($chain, $sourceip, $target) {
-      global $vcp;
-      
-      $rule = array(
-         'direction' => $chain,
-         'sort' => "1",
-         'proto' => "any",
-         'srcIP' => $sourceip,
-         'destIP'=>'0.0.0.0/0',
-         'target' => $target,
-         'match' => 'STATE',
-         'matchValue' => 'NEW,ESTABLISHED,RELATED',
-         'comment' => 'Added by Fail2Ban at '.date("Y-m-d H:i:s").' from Host '.php_uname('n')
-      );
-
-      $params = array(
-         'loginName' => VCP_USERNAME,
-         'password' => VCP_PASSWORD,
-         'vserverName' => VCP_SERVERNAME,
-         'rule' => array($rule)
-      );
-      
-      $result = $vcp->addFirewallRule($params);
    
-      if($result->return->success===true) {
-         line("Firewall rule added.");
-         return 0;
-      } else {
-         line("Firewall API error:");
-         if(DEBUG_OUTPUT) var_dump($result);
-         return 1;
-      }
-
-   }
-   
-   //--> Delete rule
-   function action_delete($chain, $sourceip, $target) {
-      global $vcp;
-
-      $params = array(
-         'loginName' => VCP_USERNAME,
-         'password' => VCP_PASSWORD,
-         'vserverName' => VCP_SERVERNAME
-      );
-      
-      $result = $vcp->getFirewall($params);
-      
-      $ruleset = $result->return;
-      
-      // If rule count <=1, no array given
-      if(is_object($ruleset) && !is_array($ruleset)) {
-         $ruleset = array($ruleset);
-      }
-      
-      $deleteset = array();
-      foreach($ruleset as $rule) {
-         if(is_object($rule) && 
-            (isset($rule->direction) && $rule->direction==$chain) && 
-            (isset($rule->srcIP) && $rule->srcIP==$sourceip) && 
-            (isset($rule->target) && $rule->target==$target)) 
-         {
-            $deleteset[] = array("id"=>$rule->id);
-         }
-      }
-      
-      if(count($deleteset)>0) {
-
-         $params['rule'] = $deleteset;
-         $result = $vcp->deleteFirewallRule($params);
-
-         if($result->return->success===true) {
-            line(count($deleteset)." Firewall rule(s) deleted.");
-            return 0;
-         } else {
-            line("Firewall API error:");
-            if(DEBUG_OUTPUT) var_dump($result);
-         }
-
-      } else {
-         line("Rule not found in firewall.");
-      }
-      
-      return 1;
-   }
+   /* FUNCTIONS END ***********************************************************/
    
    
-   /* END FUNCTIONS ***********************************************************/
    
-
    //--> Check parameters
    $initsuccess = true;
+   $action = null;
+   $chain = null;
+   $sourceip = null;
+   $target = null;
+   $comment = null;
+   
    if($argc>=5) {
       $action = $argv[1];
       $chain = $argv[2];
@@ -203,6 +126,13 @@
       $initsuccess = false;
    }
 
+   // Get Comment and filter illegal strings out
+   if($argc>=6) {
+      $comment = $argv[5];
+      $comment = preg_replace("/\&[a-zA-Z0-9]{1,5}\;/", "", $comment);
+      $comment = preg_replace("/[\<\>]/", "", $comment);
+   }
+
    if($initsuccess===false) {
       usage();
       exit(1);
@@ -219,6 +149,7 @@
    
    
    //--> Create SOAP object
+   $vcp = null;
    try {
       $vcp = new SoapClient(SOAP_URL, array('cache_wsdl' => 0));
    } catch(Exception $e) {
@@ -228,10 +159,95 @@
    
    
    //--> Select action
+   $method = null;
+   $rule = array();
+   
    switch($action) {
-      case 'add': exit(action_add($chain, $sourceip, $target)); break;
-      case 'delete': exit(action_delete($chain, $sourceip, $target)); break;
-      default: line("Invalid action given."); break;
+      
+      // Add a rule ------------------------------------------------------------
+      case 'add': 
+         line("Add firewall rule for ".$sourceip);
+         $method = "addFirewallRule";
+         
+         $rule[] = array(
+            'direction' => $chain,
+            'sort' => "1",
+            'proto' => "any",
+            'srcIP' => $sourceip,
+            'destIP'=>'0.0.0.0/0',
+            'target' => $target,
+            'match' => 'STATE',
+            'matchValue' => 'NEW,ESTABLISHED,RELATED',
+            'comment' => 'Added by Fail2Ban at '.date("Y-m-d H:i:s").' from Host '.php_uname('n').
+               ($comment!=null ? " - ".$comment : "")
+         );
+         
+         break;
+      
+      // Delete a rule ---------------------------------------------------------
+      case 'delete':
+         line("Delete firewall rule for ".$sourceip);
+         $method = "deleteFirewallRule";
+         
+         $params = array(
+            'loginName' => VCP_USERNAME,
+            'password' => VCP_PASSWORD,
+            'vserverName' => VCP_SERVERNAME
+         );
+
+         $result = $vcp->getFirewall($params);
+         $ruleset = $result->return;
+
+         // If rule count <=1, no array given
+         if(is_object($ruleset) && !is_array($ruleset)) {
+            $ruleset = array($ruleset);
+         }
+
+         $deleteset = array();
+         foreach($ruleset as $rule) {
+            if(is_object($rule) && 
+               (isset($rule->direction) && $rule->direction==$chain) && 
+               (isset($rule->srcIP) && $rule->srcIP==$sourceip) && 
+               (isset($rule->target) && $rule->target==$target)) 
+            {
+               $deleteset[] = array("id"=>$rule->id);
+            }
+         }
+         
+         if(is_array($deleteset) && count($deleteset)>0) {
+            $rule = $deleteset;
+         }
+         
+         break;
+         
    }
-
-
+   
+   
+   //--> Execute SOAP Request
+   if(is_array($rule) && count($rule)>0 && $method!=null) {
+      
+      $params = array(
+         'loginName' => VCP_USERNAME,
+         'password' => VCP_PASSWORD,
+         'vserverName' => VCP_SERVERNAME,
+         'rule' => $rule
+      );
+      
+      $result = $vcp->$method($params);
+      
+      if(isset($result->return->success) && $result->return->success===true) {
+         line("Success!");
+         exit(0);
+      } else {
+         line("Failure!");
+         if(defined('DEBUG_OUTPUT') && DEBUG_OUTPUT) {
+            var_dump($result);
+         }
+      }
+      
+   } else {
+      line("Noting to do...");
+   }
+   
+   exit(1);
+   
