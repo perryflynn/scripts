@@ -150,7 +150,7 @@
    }
 
 
-   bcmd("Enable level saving");
+   bcmd("say Enable level saving");
    bcmd("save-on");
 
    //--> Upload Files
