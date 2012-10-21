@@ -27,7 +27,8 @@
       "cube",
       "survival",
       "world_the_end",
-      "world_nether"
+      "world_nether",
+       "mc"
    );
 
    //--> FTP Hostname
@@ -95,7 +96,7 @@
 
 
    //--> Fix Settings
-   $screen_command = "$screen -s $screen_sessionname -X eval 'stuff \015\"%s\"\015'";
+   $screen_command = "$screen -S $screen_sessionname -X eval 'stuff \015\"%s\"\015'";
    $tar_command = "$tar czf \"%s\" \"%s\"";
 
    /**
