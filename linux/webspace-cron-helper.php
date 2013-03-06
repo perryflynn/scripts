@@ -32,7 +32,7 @@
  * MD5 Hashed Securekey
  * @var string
  */
-$securekey = "3e8decd7a39d36d24c5bb9352148647c";
+$securekey = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
 
 
 /**
