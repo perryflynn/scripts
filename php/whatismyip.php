@@ -194,25 +194,6 @@ curl $baseurl?plain&amp;key=useragent</pre>
 </html>
 HEREDOC;
 
-// Start a session for piwik
-session_start();
-
-// Piwik stats
-$piwikurl = 'http://stats.anwendungsentwickler.ws/piwik.php?'.
-'action_name='.urlencode($_SERVER['QUERY_STRING']).'&'.
-'url='.urlencode("http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']).'&'.
-'idsite=14&rand='.mt_rand(1,9999999).'&'.
-'h='.date('H').'&'.
-'m='.date('i').'&'.
-'s='.date('s').'&'.
-'rec=1&'.
-'apiv=1&'.
-'cookie=&'.
-'urlref='.(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "").'&'.
-'_id='.session_id();
-   
-fetchurl($piwikurl, array('USERAGENT'=>$_SERVER['HTTP_USER_AGENT']));
-
 // Build Data Array
 $data = array(
    "clientip" =>$_SERVER['REMOTE_ADDR'],
