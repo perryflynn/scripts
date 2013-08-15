@@ -93,23 +93,23 @@ $usage_text = <<<HEREDOC
 
       <h2>JSON Usage</h2>
       <strong>Shell:</strong><br>
-      <pre>curl $baseurl?json</pre>
+      <pre>curl &quot;$baseurl?json&quot;</pre>
       
       <h2>Serialized Usage</h2>
       <strong>Shell:</strong><br>
-      <pre>curl $baseurl?serialize</pre>
+      <pre>curl &quot;$baseurl?serialize&quot;</pre>
 
       <h2>Plain Usage</h2>
       <strong>Shell:</strong><br>
-      <pre>curl $baseurl?plain&amp;key=clientip
-curl $baseurl?plain&amp;key=clienthost
-curl $baseurl?plain&amp;key=time
-curl $baseurl?plain&amp;key=timestamp
-curl $baseurl?plain&amp;key=useragent</pre>
+      <pre>curl &quot;$baseurl?plain&amp;key=clientip&quot;
+curl &quot;$baseurl?plain&amp;key=clienthost&quot;
+curl &quot;$baseurl?plain&amp;key=time&quot;
+curl &quot;$baseurl?plain&amp;key=timestamp&quot;
+curl &quot;$baseurl?plain&amp;key=useragent&quot;</pre>
       
       <h2>XML Usage</h2>
       <strong>Shell:</strong><br>
-      <pre>curl $baseurl?xml</pre>
+      <pre>curl &quot;$baseurl?xml&quot;</pre>
    
    </div>
    
@@ -125,6 +125,10 @@ $data = array(
    "timestamp" => time(),
    "useragent" => $_SERVER['HTTP_USER_AGENT'],
 );
+
+if(file_exists("misc.inc.php")) {
+   include("misc.inc.php");
+}
 
 // Set output mode
 $action = "usage";
