@@ -12,7 +12,7 @@ function getBaseURL()
    } else {
       $phpfile = $_SERVER['PHP_SELF'];
    }
-   return "http://".$_SERVER['SERVER_NAME'].$phpfile;
+   return "http".($_SERVER['SERVER_PORT']==443?"s":"")."://".$_SERVER['SERVER_NAME'].$phpfile;
 }
 
 function titledwrap($title, $text, $maxlength=65)
@@ -291,7 +291,7 @@ curl &quot;$baseurl?plain&amp;key=useragent&quot;</pre>
       <pre style="white-space: pre-wrap;">$separated_output</pre>
    
       <div class="footer">
-         <a href="#" target="_blank">Impressum</a>
+         <a href="http://blechert.net/imprint.html?hash=591ba8be663a64ded5fa7fd4182d392d" target="_blank">Impressum</a>
       </div>
    
    </div>
